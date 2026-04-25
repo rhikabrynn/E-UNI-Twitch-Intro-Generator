@@ -460,9 +460,9 @@ body::after {
             <div class="ph-icon">◈</div>
             <div>Fill in the fields and click GENERATE</div>
           </div>
-          <iframe id="o-frame" style="display:none;"></iframe>
+          <canvas id="o-canvas" width="1920" height="1080" style="display:none;position:absolute;top:0;left:0;transform-origin:top left;"></canvas>
         </div>
-        <a class="btn-download" id="o-download" download="concord_overlay.html">⬇ DOWNLOAD HTML FILE</a>
+        <a class="btn-download" id="o-download">⬇ DOWNLOAD PNG</a>
         <div class="status-line" id="o-dl-status"></div>
       </div>
 
@@ -488,12 +488,19 @@ function scaleFrame(wrapId, frameId) {
   frame.style.transform = 'scale(' + scale + ')';
   wrap.style.height = (1080 * scale) + 'px';
 }
+function scaleCanvas(wrapId, canvasId) {
+  var wrap   = document.getElementById(wrapId);
+  var canvas = document.getElementById(canvasId);
+  var scale  = wrap.offsetWidth / 1920;
+  canvas.style.transform = 'scale(' + scale + ')';
+  wrap.style.height = (1080 * scale) + 'px';
+}
 window.addEventListener('resize', function(){
   scaleFrame('i-preview-wrap','i-frame');
-  scaleFrame('o-preview-wrap','o-frame');
+  scaleCanvas('o-preview-wrap','o-canvas');
 });
 scaleFrame('i-preview-wrap','i-frame');
-scaleFrame('o-preview-wrap','o-frame');
+scaleCanvas('o-preview-wrap','o-canvas');
 
 function val(id, fallback) {
   var v = document.getElementById(id).value.trim();
