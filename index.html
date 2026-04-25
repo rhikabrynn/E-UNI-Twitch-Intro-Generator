@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CONCORD — Capsuleer Intro Generator</title>
+<title>CONCORD — Capsuleer Asset Generator</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
 
@@ -29,7 +29,6 @@ html, body {
   overflow-x: hidden;
 }
 
-/* animated grid background */
 body::before {
   content: '';
   position: fixed; inset: 0;
@@ -37,21 +36,18 @@ body::before {
     linear-gradient(rgba(200,148,26,0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(200,148,26,0.03) 1px, transparent 1px);
   background-size: 40px 40px;
-  pointer-events: none;
-  z-index: 0;
+  pointer-events: none; z-index: 0;
 }
-
 body::after {
   content: '';
   position: fixed; inset: 0;
   background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
-  pointer-events: none;
-  z-index: 0;
+  pointer-events: none; z-index: 0;
 }
 
 .page-wrap {
   position: relative; z-index: 1;
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 40px 24px 80px;
 }
@@ -59,7 +55,7 @@ body::after {
 /* ── Header ── */
 .site-header {
   text-align: center;
-  margin-bottom: 48px;
+  margin-bottom: 36px;
   padding-bottom: 28px;
   border-bottom: 1px solid var(--border);
   position: relative;
@@ -85,14 +81,44 @@ body::after {
   margin-top: 8px;
 }
 
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+.tab-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--gold-dim);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--gold); }
+.tab-btn.active {
+  color: var(--gold-bright);
+  border-bottom-color: var(--gold-bright);
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
 /* ── Two-col layout ── */
 .main-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 28px;
+  gap: 24px;
   align-items: start;
 }
-@media (max-width: 680px) {
+@media (max-width: 720px) {
   .main-grid { grid-template-columns: 1fr; }
 }
 
@@ -126,19 +152,18 @@ body::after {
 }
 
 /* ── Form fields ── */
-.field-group { margin-bottom: 20px; }
+.field-group { margin-bottom: 18px; }
 .field-label {
   display: block;
   font-size: 10px;
   letter-spacing: 0.3em;
   color: var(--gold-dim);
-  margin-bottom: 8px;
+  margin-bottom: 7px;
 }
 .field-label span {
   color: var(--gold-bright);
   font-size: 9px;
   margin-left: 6px;
-  letter-spacing: 0.1em;
 }
 .field-input {
   display: block;
@@ -158,7 +183,6 @@ body::after {
   box-shadow: 0 0 12px rgba(200,148,26,0.15);
 }
 .field-input::placeholder { color: var(--gold-dark); }
-
 .field-hint {
   font-size: 10px;
   color: var(--gold-dark);
@@ -166,11 +190,19 @@ body::after {
   letter-spacing: 0.1em;
 }
 
-/* ── Generate button ── */
+/* badges input note */
+.badge-note {
+  font-size: 10px;
+  color: var(--gold-dark);
+  margin-top: 5px;
+  letter-spacing: 0.08em;
+}
+
+/* ── Buttons ── */
 .btn-generate {
   display: block;
   width: 100%;
-  margin-top: 28px;
+  margin-top: 24px;
   padding: 14px;
   background: transparent;
   border: 1px solid var(--gold);
@@ -196,18 +228,33 @@ body::after {
 .btn-generate:hover { color: #000; box-shadow: 0 0 20px rgba(200,148,26,0.3); }
 .btn-generate span { position: relative; z-index: 1; }
 
-/* ── Preview panel ── */
+/* ── Preview ── */
 .preview-panel { grid-column: 1 / -1; }
 
 .preview-frame-wrap {
   width: 100%;
   aspect-ratio: 16/9;
-  background: #000;
   border: 1px solid var(--border);
   position: relative;
   overflow: hidden;
   margin-bottom: 20px;
 }
+
+/* intro preview = black bg */
+.preview-frame-wrap.intro-bg { background: #000; }
+
+/* overlay preview = checkerboard to show transparency */
+.preview-frame-wrap.overlay-bg {
+  background-color: #1a1a2e;
+  background-image:
+    linear-gradient(45deg, #111 25%, transparent 25%),
+    linear-gradient(-45deg, #111 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #111 75%),
+    linear-gradient(-45deg, transparent 75%, #111 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
 .preview-frame-wrap iframe {
   width: 1920px;
   height: 1080px;
@@ -225,12 +272,8 @@ body::after {
   font-size: 12px;
   letter-spacing: 0.2em;
 }
-.preview-placeholder .ph-icon {
-  font-size: 32px;
-  opacity: 0.4;
-}
+.preview-placeholder .ph-icon { font-size: 32px; opacity: 0.4; }
 
-/* ── Download button ── */
 .btn-download {
   display: none;
   width: 100%;
@@ -243,17 +286,13 @@ body::after {
   font-weight: 900;
   letter-spacing: 0.4em;
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s;
   text-align: center;
   text-decoration: none;
+  transition: background 0.2s, box-shadow 0.2s;
 }
-.btn-download:hover {
-  background: var(--gold-bright);
-  box-shadow: 0 0 24px rgba(232,168,32,0.4);
-}
+.btn-download:hover { background: var(--gold-bright); box-shadow: 0 0 24px rgba(232,168,32,0.4); }
 .btn-download.visible { display: block; }
 
-/* ── Status line ── */
 .status-line {
   font-size: 11px;
   color: var(--gold-dim);
@@ -264,6 +303,18 @@ body::after {
 }
 .status-line.ok  { color: var(--gold-bright); }
 .status-line.err { color: #c0392b; }
+
+/* instructions */
+.instructions {
+  font-size: 12px;
+  color: var(--gold-dim);
+  line-height: 2;
+  letter-spacing: 0.05em;
+}
+.instructions p { margin-bottom: 4px; }
+.instructions .hl { color: var(--gold-bright); }
+.instructions hr { border-color: var(--gold-dark); margin: 16px 0; }
+.instructions .note { color: var(--gold-dark); font-size: 10px; letter-spacing: 0.1em; }
 </style>
 </head>
 <body>
@@ -271,187 +322,274 @@ body::after {
 
   <header class="site-header">
     <div class="site-logo">CONCORD — CAPSULEER REGISTRY</div>
-    <div class="site-sub">INTRO GENERATOR  ·  NEW EDEN AUTHORITY  ·  SECURE TOOL</div>
+    <div class="site-sub">ASSET GENERATOR  ·  NEW EDEN AUTHORITY  ·  SECURE TOOL</div>
   </header>
 
-  <div class="main-grid">
-
-    <!-- Form panel -->
-    <div class="panel">
-      <div class="c-br"></div><div class="c-bl"></div>
-      <div class="panel-title">// PILOT DATA INPUT</div>
-
-      <div class="field-group">
-        <label class="field-label" for="f-name">PILOT NAME <span>* required</span></label>
-        <input class="field-input" id="f-name" type="text" placeholder="e.g. Rhika Brynn" maxlength="24" autocomplete="off"/>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label" for="f-corp">CORPORATION</label>
-        <input class="field-input" id="f-corp" type="text" placeholder="e.g. EVE University" maxlength="30" autocomplete="off"/>
-        <div class="field-hint">Leave blank to use the default value</div>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label" for="f-alliance">ALLIANCE</label>
-        <input class="field-input" id="f-alliance" type="text" placeholder="e.g. Ivy League" maxlength="30" autocomplete="off"/>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label" for="f-sec">SEC STATUS</label>
-        <input class="field-input" id="f-sec" type="text" placeholder="e.g. +2.4" maxlength="8" autocomplete="off"/>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label" for="f-system">SISTEMA</label>
-        <input class="field-input" id="f-system" type="text" placeholder="e.g. JITA 4-4 // CALDARI PRIME" maxlength="36" autocomplete="off"/>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label" for="f-yc">DATA YC</label>
-        <input class="field-input" id="f-yc" type="text" placeholder="e.g. 126.04.22" maxlength="12" autocomplete="off"/>
-      </div>
-
-      <button class="btn-generate" onclick="generatePreview()"><span>▶ GENERATE PREVIEW</span></button>
-      <div class="status-line" id="status-line"></div>
-    </div>
-
-    <!-- Info panel -->
-    <div class="panel">
-      <div class="c-br"></div><div class="c-bl"></div>
-      <div class="panel-title">// INSTRUCTIONS</div>
-
-      <div style="font-size:12px; color: var(--gold-dim); line-height:2; letter-spacing:0.05em;">
-        <p style="color:var(--gold); margin-bottom:12px;">How to use this tool:</p>
-        <p>01 &nbsp;Enter your pilot name in the field on the left.</p>
-        <br/>
-        <p>02 &nbsp;You can customise your corporation, alliance, sec status, system and YC date. Blank fields will use default values.</p>
-        <br/>
-        <p>03 &nbsp;Click <span style="color:var(--gold-bright)">GENERATE PREVIEW</span> to see the result.</p>
-        <br/>
-        <p>04 &nbsp;If you are happy with it, click <span style="color:var(--gold-bright)">DOWNLOAD</span> to save the HTML file.</p>
-        <br/>
-        <p>05 &nbsp;In OBS, add a <span style="color:var(--gold-bright)">Browser Source</span> with the downloaded file. Set the resolution to <span style="color:var(--gold-bright)">1920×1080</span>.</p>
-        <br/>
-        <hr style="border-color: var(--gold-dark); margin: 16px 0;"/>
-        <p style="color: var(--gold-dark); font-size:10px; letter-spacing:0.1em;">
-          CONCORD REGISTRY TOOL — NEW EDEN AUTHORITY<br/>
-          For internal use by authorised streamers.
-        </p>
-      </div>
-    </div>
-
-    <!-- Preview panel -->
-    <div class="panel preview-panel">
-      <div class="c-br"></div><div class="c-bl"></div>
-      <div class="panel-title">// PREVIEW — 1920×1080</div>
-
-      <div class="preview-frame-wrap" id="preview-wrap">
-        <div class="preview-placeholder" id="preview-placeholder">
-          <div class="ph-icon">◈</div>
-          <div>Fill in the fields and click GENERATE</div>
-        </div>
-        <iframe id="preview-frame" style="display:none;"></iframe>
-      </div>
-
-      <a class="btn-download" id="btn-download" download="concord_intro.html">
-        ⬇ DOWNLOAD HTML FILE
-      </a>
-      <div class="status-line" id="download-status"></div>
-    </div>
-
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('intro', this)">▶ STREAM INTRO</button>
+    <button class="tab-btn" onclick="switchTab('overlay', this)">◈ LIVE OVERLAY</button>
   </div>
-</div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--  TAB 1 — INTRO                            -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-intro">
+    <div class="main-grid">
+
+      <div class="panel">
+        <div class="c-br"></div><div class="c-bl"></div>
+        <div class="panel-title">// PILOT DATA — INTRO</div>
+
+        <div class="field-group">
+          <label class="field-label" for="i-name">PILOT NAME <span>* required</span></label>
+          <input class="field-input" id="i-name" type="text" placeholder="e.g. Rhika Brynn" maxlength="24" autocomplete="off"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="i-corp">CORPORATION</label>
+          <input class="field-input" id="i-corp" type="text" placeholder="e.g. EVE University" maxlength="30" autocomplete="off"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="i-alliance">ALLIANCE</label>
+          <input class="field-input" id="i-alliance" type="text" placeholder="e.g. Ivy League" maxlength="30" autocomplete="off"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="i-sec">SEC STATUS</label>
+          <input class="field-input" id="i-sec" type="text" placeholder="e.g. +2.4" maxlength="8" autocomplete="off"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="i-system">SYSTEM</label>
+          <input class="field-input" id="i-system" type="text" placeholder="e.g. JITA 4-4 // CALDARI PRIME" maxlength="36" autocomplete="off"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="i-yc">YC DATE</label>
+          <input class="field-input" id="i-yc" type="text" placeholder="e.g. 126.04.22" maxlength="12" autocomplete="off"/>
+        </div>
+
+        <button class="btn-generate" onclick="generateIntro()"><span>▶ GENERATE PREVIEW</span></button>
+        <div class="status-line" id="i-status"></div>
+      </div>
+
+      <div class="panel">
+        <div class="c-br"></div><div class="c-bl"></div>
+        <div class="panel-title">// INSTRUCTIONS</div>
+        <div class="instructions">
+          <p style="color:var(--gold); margin-bottom:12px;">How to use this tool:</p>
+          <p>01 &nbsp;Enter your pilot name in the field on the left.</p><br/>
+          <p>02 &nbsp;Customise corporation, alliance, sec status, system and YC date. Blank fields use default values.</p><br/>
+          <p>03 &nbsp;Click <span class="hl">GENERATE PREVIEW</span> to see the result.</p><br/>
+          <p>04 &nbsp;If happy, click <span class="hl">DOWNLOAD</span> to save the HTML file.</p><br/>
+          <p>05 &nbsp;In OBS, add a <span class="hl">Browser Source</span> with the downloaded file. Set resolution to <span class="hl">1920×1080</span>.</p>
+          <hr/>
+          <p class="note">CONCORD REGISTRY TOOL — NEW EDEN AUTHORITY<br/>For internal use by authorised streamers.</p>
+        </div>
+      </div>
+
+      <div class="panel preview-panel">
+        <div class="c-br"></div><div class="c-bl"></div>
+        <div class="panel-title">// PREVIEW — 1920×1080</div>
+        <div class="preview-frame-wrap intro-bg" id="i-preview-wrap">
+          <div class="preview-placeholder" id="i-placeholder">
+            <div class="ph-icon">◈</div>
+            <div>Fill in the fields and click GENERATE</div>
+          </div>
+          <iframe id="i-frame" style="display:none;"></iframe>
+        </div>
+        <a class="btn-download" id="i-download" download="concord_intro.html">⬇ DOWNLOAD HTML FILE</a>
+        <div class="status-line" id="i-dl-status"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--  TAB 2 — OVERLAY                          -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-overlay">
+    <div class="main-grid">
+
+      <div class="panel">
+        <div class="c-br"></div><div class="c-bl"></div>
+        <div class="panel-title">// PILOT DATA — OVERLAY</div>
+
+        <div class="field-group">
+          <label class="field-label" for="o-name">PILOT NAME <span>* required</span></label>
+          <input class="field-input" id="o-name" type="text" placeholder="e.g. Rhika Brynn" maxlength="24" autocomplete="off"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="o-sub">SUBTITLE</label>
+          <input class="field-input" id="o-sub" type="text" placeholder="e.g. CAPSULEER · CALDARI STATE" maxlength="40" autocomplete="off"/>
+          <div class="field-hint">Leave blank to use default</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="o-quote">QUOTE <span>optional</span></label>
+          <input class="field-input" id="o-quote" type="text" placeholder='e.g. "Words are cheaper than ammunition..."' maxlength="80" autocomplete="off"/>
+          <div class="field-hint">Leave blank to hide the quote</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="o-badges">BADGES</label>
+          <input class="field-input" id="o-badges" type="text" placeholder="e.g. EVE UNIVERSITY, SECURITY OPS" maxlength="80" autocomplete="off"/>
+          <div class="badge-note">Separate multiple badges with a comma</div>
+        </div>
+
+        <button class="btn-generate" onclick="generateOverlay()"><span>◈ GENERATE PREVIEW</span></button>
+        <div class="status-line" id="o-status"></div>
+      </div>
+
+      <div class="panel">
+        <div class="c-br"></div><div class="c-bl"></div>
+        <div class="panel-title">// INSTRUCTIONS</div>
+        <div class="instructions">
+          <p style="color:var(--gold); margin-bottom:12px;">How to use the overlay:</p>
+          <p>01 &nbsp;Enter your pilot name and customise the subtitle, quote and badges.</p><br/>
+          <p>02 &nbsp;The quote field is optional — leave it blank and it won't appear.</p><br/>
+          <p>03 &nbsp;Click <span class="hl">GENERATE PREVIEW</span> to see the result. The checkerboard background represents transparency.</p><br/>
+          <p>04 &nbsp;Click <span class="hl">DOWNLOAD</span> to save the HTML file.</p><br/>
+          <p>05 &nbsp;In OBS, add a <span class="hl">Browser Source</span> with the downloaded file. Set resolution to <span class="hl">1920×1080</span> and enable <span class="hl">Shutdown source when not visible</span>.</p><br/>
+          <p>06 &nbsp;Make sure <span class="hl">Allow transparency</span> is checked in the Browser Source settings.</p>
+          <hr/>
+          <p class="note">CONCORD REGISTRY TOOL — NEW EDEN AUTHORITY<br/>For internal use by authorised streamers.</p>
+        </div>
+      </div>
+
+      <div class="panel preview-panel">
+        <div class="c-br"></div><div class="c-bl"></div>
+        <div class="panel-title">// PREVIEW — 1920×1080 &nbsp;<span style="font-size:9px;color:var(--gold-dark);letter-spacing:0.1em;">checkerboard = transparent</span></div>
+        <div class="preview-frame-wrap overlay-bg" id="o-preview-wrap">
+          <div class="preview-placeholder" id="o-placeholder">
+            <div class="ph-icon">◈</div>
+            <div>Fill in the fields and click GENERATE</div>
+          </div>
+          <iframe id="o-frame" style="display:none;"></iframe>
+        </div>
+        <a class="btn-download" id="o-download" download="concord_overlay.html">⬇ DOWNLOAD HTML FILE</a>
+        <div class="status-line" id="o-dl-status"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
 
 <script>
-// Scale iframe to fit container
-function scalePreview() {
-  var wrap = document.getElementById('preview-wrap');
-  var frame = document.getElementById('preview-frame');
+/* ── Tab switching ── */
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── Helpers ── */
+function scaleFrame(wrapId, frameId) {
+  var wrap  = document.getElementById(wrapId);
+  var frame = document.getElementById(frameId);
   var scale = wrap.offsetWidth / 1920;
   frame.style.transform = 'scale(' + scale + ')';
   wrap.style.height = (1080 * scale) + 'px';
 }
-window.addEventListener('resize', scalePreview);
-scalePreview();
-
-function setStatus(msg, type) {
-  var el = document.getElementById('status-line');
-  el.textContent = msg;
-  el.className = 'status-line' + (type ? ' ' + type : '');
-}
+window.addEventListener('resize', function(){
+  scaleFrame('i-preview-wrap','i-frame');
+  scaleFrame('o-preview-wrap','o-frame');
+});
+scaleFrame('i-preview-wrap','i-frame');
+scaleFrame('o-preview-wrap','o-frame');
 
 function val(id, fallback) {
   var v = document.getElementById(id).value.trim();
   return v || fallback;
 }
+function setStatus(id, msg, type) {
+  var el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'status-line' + (type ? ' ' + type : '');
+}
 
-function generatePreview() {
-  var name = document.getElementById('f-name').value.trim();
-  if (!name) {
-    setStatus('⚠ Please enter the pilot name.', 'err');
-    document.getElementById('f-name').focus();
-    return;
-  }
+/* ══════════════════════════════════════════════════
+   INTRO GENERATOR
+══════════════════════════════════════════════════ */
+function generateIntro() {
+  var name = document.getElementById('i-name').value.trim();
+  if (!name) { setStatus('i-status','⚠ Please enter the pilot name.','err'); document.getElementById('i-name').focus(); return; }
+  setStatus('i-status','Generating...','');
 
-  setStatus('Generating...', '');
+  var pilotName = name.toUpperCase();
+  var corp      = val('i-corp',    'EVE UNIVERSITY');
+  var alliance  = val('i-alliance','IVY LEAGUE');
+  var sec       = val('i-sec',     '+2.4');
+  var secLabel  = (parseFloat(sec) >= 0) ? '[COMPLIANT]' : '[SUSPECT]';
+  var system    = val('i-system',  'JITA 4-4 // CALDARI PRIME');
+  var yc        = val('i-yc',      '126.04.22');
+  var pilotSub  = 'CAPSULEER  ·  NEW EDEN  ·  [' + corp.toUpperCase().substring(0,8) + ']';
+  var ycYear    = yc.split('.')[0] || '126';
 
-  var pilotName    = name.toUpperCase();
-  var corp         = val('f-corp', 'EVE UNIVERSITY');
-  var alliance     = val('f-alliance', 'IVY LEAGUE');
-  var sec          = val('f-sec', '+2.4');
-  var secLabel     = sec >= 0 ? '[COMPLIANT]' : '[SUSPECT]';
-  var system       = val('f-system', 'JITA 4-4 // CALDARI PRIME');
-  var yc           = val('f-yc', '126.04.22');
-  var pilotSub     = 'CAPSULEER  ·  NEW EDEN  ·  [' + corp.toUpperCase().substring(0,8) + ']';
+  var html = buildIntroHTML(pilotName, pilotSub, corp, alliance, sec, secLabel, system, yc, ycYear);
 
-  var html = buildIntroHTML(pilotName, pilotSub, corp, alliance, sec, secLabel, system, yc);
-
-  // Show in iframe
-  var frame = document.getElementById('preview-frame');
+  var frame = document.getElementById('i-frame');
   frame.style.display = 'block';
-  document.getElementById('preview-placeholder').style.display = 'none';
+  document.getElementById('i-placeholder').style.display = 'none';
   frame.srcdoc = html;
-  scalePreview();
+  scaleFrame('i-preview-wrap','i-frame');
 
-  // Setup download
-  var blob = new Blob([html], { type: 'text/html' });
+  var blob = new Blob([html], {type:'text/html'});
   var url  = URL.createObjectURL(blob);
-  var btn  = document.getElementById('btn-download');
+  var btn  = document.getElementById('i-download');
   btn.href = url;
   btn.download = 'concord_intro_' + name.replace(/\s+/g,'_').toLowerCase() + '.html';
   btn.classList.add('visible');
 
-  setStatus('✓ Preview generated successfully.', 'ok');
-  document.getElementById('download-status').textContent = 'Click the button above to save the file.';
-  document.getElementById('download-status').className = 'status-line ok';
+  setStatus('i-status','✓ Preview generated successfully.','ok');
+  document.getElementById('i-dl-status').textContent = 'Click the button above to save the file.';
+  document.getElementById('i-dl-status').className = 'status-line ok';
 }
 
-function buildIntroHTML(pilotName, pilotSub, corp, alliance, sec, secLabel, system, yc) {
+/* ══════════════════════════════════════════════════
+   OVERLAY GENERATOR
+══════════════════════════════════════════════════ */
+function generateOverlay() {
+  var name = document.getElementById('o-name').value.trim();
+  if (!name) { setStatus('o-status','⚠ Please enter the pilot name.','err'); document.getElementById('o-name').focus(); return; }
+  setStatus('o-status','Generating...','');
+
+  var pilotName = name.toUpperCase();
+  var sub       = val('o-sub',    'CAPSULEER · CALDARI STATE');
+  var quote     = document.getElementById('o-quote').value.trim();
+  var badgesRaw = val('o-badges', 'EVE UNIVERSITY, SECURITY OPS');
+  var badges    = badgesRaw.split(',').map(function(b){ return b.trim().toUpperCase(); }).filter(Boolean);
+
+  var html = buildOverlayHTML(pilotName, sub, quote, badges);
+
+  var frame = document.getElementById('o-frame');
+  frame.style.display = 'block';
+  document.getElementById('o-placeholder').style.display = 'none';
+  frame.srcdoc = html;
+  scaleFrame('o-preview-wrap','o-frame');
+
+  var blob = new Blob([html], {type:'text/html'});
+  var url  = URL.createObjectURL(blob);
+  var btn  = document.getElementById('o-download');
+  btn.href = url;
+  btn.download = 'concord_overlay_' + name.replace(/\s+/g,'_').toLowerCase() + '.html';
+  btn.classList.add('visible');
+
+  setStatus('o-status','✓ Preview generated successfully.','ok');
+  document.getElementById('o-dl-status').textContent = 'Click the button above to save the file.';
+  document.getElementById('o-dl-status').className = 'status-line ok';
+}
+
+/* ══════════════════════════════════════════════════
+   BUILD INTRO HTML
+══════════════════════════════════════════════════ */
+function buildIntroHTML(pilotName, pilotSub, corp, alliance, sec, secLabel, system, yc, ycYear) {
   return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<html lang="en"><head><meta charset="UTF-8"/>
 <title>${pilotName} — CONCORD Intro</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
-#intro {
-  background: #000; width: 1920px; height: 1080px;
-  overflow: hidden; position: relative;
-  font-family: 'Courier New', monospace;
-}
-#scanlines {
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
-  pointer-events: none; z-index: 10;
-}
-#grid-bg {
-  position: absolute; inset: 0;
-  background-image: linear-gradient(rgba(200,148,26,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(200,148,26,0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
+#intro { background: #000; width: 1920px; height: 1080px; overflow: hidden; position: relative; font-family: 'Courier New', monospace; }
+#scanlines { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px); pointer-events: none; z-index: 10; }
+#grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(200,148,26,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(200,148,26,0.04) 1px, transparent 1px); background-size: 40px 40px; }
 .corner { position: absolute; width: 36px; height: 36px; }
 .corner.tl { top: 18px; left: 18px; border-top: 2px solid #C8941A; border-left: 2px solid #C8941A; }
 .corner.tr { top: 18px; right: 18px; border-top: 2px solid #C8941A; border-right: 2px solid #C8941A; }
@@ -465,9 +603,7 @@ html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; 
 #divider-top { position: absolute; top: 72px; left: 5%; right: 5%; height: 0.5px; background: #C8941A; opacity: 0; transform: scaleX(0); transform-origin: center; }
 #terminal { position: absolute; top: 90px; left: 5%; width: 38%; opacity: 0; }
 .t-line { font-size: 13px; color: #6a4e0e; letter-spacing: 0.05em; line-height: 1.9; white-space: nowrap; overflow: hidden; width: 0; }
-.t-line.gold { color: #C8941A; }
-.t-line.bright { color: #E8A820; font-weight: 700; }
-.t-line.dim { color: #3a2a06; }
+.t-line.gold { color: #C8941A; } .t-line.bright { color: #E8A820; font-weight: 700; } .t-line.dim { color: #3a2a06; }
 .t-sep { border: none; border-top: 0.5px solid #3a2a06; margin: 8px 0; opacity: 0; }
 #vert-div { position: absolute; top: 90px; bottom: 80px; left: 46%; width: 0.5px; background: #3a2a06; opacity: 0; }
 #portrait-zone { position: absolute; top: 80px; right: 4%; width: 50%; bottom: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
@@ -479,24 +615,18 @@ html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; 
 #pilot-name { position: absolute; right: 4%; top: 50%; transform: translateY(-50%); width: 50%; font-size: 52px; color: #E8A820; font-weight: 700; letter-spacing: 0.2em; text-align: center; opacity: 0; }
 #pilot-sub { position: absolute; right: 4%; top: calc(50% + 56px); width: 50%; font-size: 13px; color: #C8941A; letter-spacing: 0.35em; text-align: center; opacity: 0; }
 #status-bar { position: absolute; bottom: 28px; left: 5%; right: 5%; display: flex; justify-content: space-between; align-items: center; opacity: 0; }
-.st-item { font-size: 11px; color: #6a4e0e; letter-spacing: 0.15em; }
-.st-item span { color: #C8941A; }
+.st-item { font-size: 11px; color: #6a4e0e; letter-spacing: 0.15em; } .st-item span { color: #C8941A; }
 #access-granted { position: absolute; left: 0; right: 0; top: 72%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
 #access-granted .ag-text { font-size: 64px; color: #E8A820; font-weight: 700; letter-spacing: 0.4em; border: 2px solid #C8941A; padding: 0.4em 1em; }
 #fade-out { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }
-</style>
-</head>
-<body>
+</style></head><body>
 <div id="intro">
-  <div id="grid-bg"></div>
-  <div id="scanlines"></div>
-  <div class="corner tl"></div><div class="corner tr"></div>
-  <div class="corner bl"></div><div class="corner br"></div>
-  <div id="top-bar"></div>
-  <div id="bot-bar"></div>
+  <div id="grid-bg"></div><div id="scanlines"></div>
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+  <div id="top-bar"></div><div id="bot-bar"></div>
   <div id="header">
     <div class="concord-label">CONCORD — CAPSULEER REGISTRY</div>
-    <div class="sub-label">SECURE CHANNEL  ·  NEW EDEN AUTHORITY  ·  YC${yc.split('.')[0] || '126'}</div>
+    <div class="sub-label">SECURE CHANNEL  ·  NEW EDEN AUTHORITY  ·  YC${ycYear}</div>
   </div>
   <div id="divider-top"></div>
   <div id="terminal">
@@ -556,8 +686,7 @@ function fadeEl(el,to,dur,delay){delay=delay||0;return new Promise(function(res)
 function typeEl(el,delay){delay=delay||0;return new Promise(function(res){setTimeout(function(){var fullW=el.scrollWidth+'px';el.style.transition='width 0.4s steps(30,end)';el.style.width=fullW;setTimeout(res,420);},delay);})}
 function showSep(el,delay){delay=delay||0;return new Promise(function(res){setTimeout(function(){el.style.transition='opacity 200ms';el.style.opacity=1;setTimeout(res,200);},delay);})}
 async function runIntro(){
-  var tb=document.getElementById('top-bar');
-  tb.style.opacity='1';tb.style.transition='transform 0.6s ease-out';tb.style.transform='scaleX(1)';
+  var tb=document.getElementById('top-bar');tb.style.opacity='1';tb.style.transition='transform 0.6s ease-out';tb.style.transform='scaleX(1)';
   setTimeout(function(){var bb=document.getElementById('bot-bar');bb.style.opacity='1';bb.style.transition='transform 0.6s ease-out';bb.style.transform='scaleX(1)';},200);
   await fadeEl(document.getElementById('header'),1,400,600);
   var dt=document.getElementById('divider-top');dt.style.opacity='1';dt.style.transition='transform 0.5s ease-out';dt.style.transform='scaleX(1)';
@@ -572,16 +701,84 @@ async function runIntro(){
   await fadeEl(document.getElementById('status-bar'),1,400,400);
   await new Promise(function(r){setTimeout(r,1500);});
   var ag=document.getElementById('access-granted');
-  await fadeEl(ag,1,300);
-  await new Promise(function(r){setTimeout(r,800);});
-  await fadeEl(ag,0,300);
+  await fadeEl(ag,1,300);await new Promise(function(r){setTimeout(r,800);});await fadeEl(ag,0,300);
   await new Promise(function(r){setTimeout(r,600);});
   await fadeEl(document.getElementById('fade-out'),1,1000);
 }
 window.addEventListener('load',function(){setTimeout(runIntro,300);});
 <\/script>
-</body>
-</html>`;
+</body></html>`;
+}
+
+/* ══════════════════════════════════════════════════
+   BUILD OVERLAY HTML
+══════════════════════════════════════════════════ */
+function buildOverlayHTML(pilotName, sub, quote, badges) {
+  var quoteHTML = quote
+    ? `<div id="quote-line">${quote}</div>`
+    : '';
+
+  var badgesHTML = badges.map(function(b){
+    return `<div class="badge">${b}</div>`;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/>
+<title>${pilotName} — Live Overlay</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: transparent; font-family: 'Courier New', monospace; }
+#overlay { width: 1920px; height: 1080px; position: relative; background: transparent; }
+#frame-top { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #C8941A 0%, #C8941A 60%, transparent 100%); }
+#frame-left { position: absolute; top: 0; left: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, #C8941A 0%, #C8941A 80%, transparent 100%); }
+#frame-bottom-left { position: absolute; bottom: 0; left: 0; width: 420px; height: 3px; background: linear-gradient(90deg, #C8941A 0%, transparent 100%); }
+.corner-mark { position: absolute; width: 20px; height: 20px; }
+.corner-mark.tl { top: 0; left: 0; border-top: 3px solid #E8A820; border-left: 3px solid #E8A820; }
+.corner-mark.tr { top: 0; right: 0; border-top: 3px solid #C8941A; border-right: 3px solid #C8941A; opacity: 0.4; }
+.corner-mark.br { bottom: 0; right: 0; border-bottom: 3px solid #C8941A; border-right: 3px solid #C8941A; opacity: 0.4; }
+#info-block { position: absolute; bottom: 36px; left: 28px; width: 440px; }
+#quote-line { font-size: 13px; color: #7a5c14; font-style: italic; letter-spacing: 0.05em; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #3a2a06; }
+#divider-line { width: 100%; height: 1px; background: linear-gradient(90deg, #C8941A 0%, transparent 100%); margin-bottom: 10px; }
+#pilot-name { font-size: 48px; font-weight: 700; color: #C8941A; letter-spacing: 0.08em; line-height: 1; margin-bottom: 8px; text-shadow: 0 0 40px rgba(200,148,26,0.3); }
+#pilot-sub { font-size: 12px; color: #8a6420; letter-spacing: 0.35em; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #2a1e04; }
+#badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge { font-size: 10px; color: #C8941A; border: 1px solid #5a3c0a; padding: 4px 10px; letter-spacing: 0.2em; background: rgba(200,148,26,0.05); }
+#logo-zone { position: absolute; bottom: 24px; right: 24px; display: flex; align-items: center; gap: 16px; opacity: 0.85; }
+.logo-ring { width: 64px; height: 64px; border-radius: 50%; border: 1px solid #5a3c0a; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); }
+</style></head><body>
+<div id="overlay">
+  <div id="frame-top"></div>
+  <div id="frame-left"></div>
+  <div id="frame-bottom-left"></div>
+  <div class="corner-mark tl"></div>
+  <div class="corner-mark tr"></div>
+  <div class="corner-mark br"></div>
+  <div id="info-block">
+    ${quoteHTML}
+    <div id="divider-line"></div>
+    <div id="pilot-name">${pilotName}</div>
+    <div id="pilot-sub">${sub.toUpperCase()}</div>
+    <div id="badges">${badgesHTML}</div>
+  </div>
+  <div id="logo-zone">
+    <div class="logo-ring">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 3L38 10V24C38 33 22 41 22 41C22 41 6 33 6 24V10L22 3Z" stroke="#C8941A" stroke-width="1.2" fill="rgba(200,148,26,0.08)"/>
+        <text x="22" y="26" text-anchor="middle" font-family="Courier New" font-size="7" font-weight="700" fill="#C8941A" letter-spacing="1">E-UNI</text>
+      </svg>
+    </div>
+    <div class="logo-ring">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="22" cy="22" r="18" stroke="#C8941A" stroke-width="1" fill="rgba(200,148,26,0.05)"/>
+        <circle cx="22" cy="22" r="12" stroke="#6a4e0e" stroke-width="0.5" fill="none"/>
+        <path d="M22 8 L26 18 L22 15 L18 18 Z" fill="#C8941A" opacity="0.8"/>
+        <path d="M22 36 L26 26 L22 29 L18 26 Z" fill="#C8941A" opacity="0.5"/>
+        <circle cx="22" cy="22" r="3" fill="#E8A820"/>
+      </svg>
+    </div>
+  </div>
+</div>
+</body></html>`;
 }
 </script>
 </body>
