@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CONCORD — Capsuleer Intro Generator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --gold: #C8941A;
+  --gold-bright: #E8A820;
+  --gold-dim: #6a4e0e;
+  --gold-dark: #3a2a06;
+  --bg: #04080a;
+  --surface: #080e10;
+  --surface2: #0d1518;
+  --border: rgba(200,148,26,0.2);
+  --border-bright: rgba(200,148,26,0.5);
+}
+
+html, body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--gold);
+  font-family: 'Share Tech Mono', monospace;
+  overflow-x: hidden;
+}
+
+/* animated grid background */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(200,148,26,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,148,26,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-wrap {
+  position: relative; z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* ── Header ── */
+.site-header {
+  text-align: center;
+  margin-bottom: 48px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.site-header::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 1px;
+  background: var(--gold-bright);
+}
+.site-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(14px, 2.5vw, 22px);
+  font-weight: 900;
+  letter-spacing: 0.5em;
+  color: var(--gold-bright);
+  text-shadow: 0 0 30px rgba(232,168,32,0.3);
+}
+.site-sub {
+  font-size: 11px;
+  color: var(--gold-dim);
+  letter-spacing: 0.35em;
+  margin-top: 8px;
+}
+
+/* ── Two-col layout ── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+@media (max-width: 680px) {
+  .main-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Panel ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  position: relative;
+  padding: 28px 24px;
+}
+.panel::before, .panel::after,
+.panel .c-br, .panel .c-bl {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+}
+.panel::before  { top: -1px;    left: -1px;  border-top: 2px solid var(--gold);  border-left:  2px solid var(--gold); }
+.panel::after   { top: -1px;    right: -1px; border-top: 2px solid var(--gold);  border-right: 2px solid var(--gold); }
+.panel .c-br    { bottom: -1px; right: -1px; border-bottom: 2px solid var(--gold); border-right: 2px solid var(--gold); }
+.panel .c-bl    { bottom: -1px; left: -1px;  border-bottom: 2px solid var(--gold); border-left:  2px solid var(--gold); }
+
+.panel-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: var(--gold-dim);
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--gold-dark);
+}
+
+/* ── Form fields ── */
+.field-group { margin-bottom: 20px; }
+.field-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--gold-dim);
+  margin-bottom: 8px;
+}
+.field-label span {
+  color: var(--gold-bright);
+  font-size: 9px;
+  margin-left: 6px;
+  letter-spacing: 0.1em;
+}
+.field-input {
+  display: block;
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--gold-bright);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(200,148,26,0.15);
+}
+.field-input::placeholder { color: var(--gold-dark); }
+
+.field-hint {
+  font-size: 10px;
+  color: var(--gold-dark);
+  margin-top: 5px;
+  letter-spacing: 0.1em;
+}
+
+/* ── Generate button ── */
+.btn-generate {
+  display: block;
+  width: 100%;
+  margin-top: 28px;
+  padding: 14px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.btn-generate::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--gold);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 0;
+}
+.btn-generate:hover::before { transform: translateX(0); }
+.btn-generate:hover { color: #000; box-shadow: 0 0 20px rgba(200,148,26,0.3); }
+.btn-generate span { position: relative; z-index: 1; }
+
+/* ── Preview panel ── */
+.preview-panel { grid-column: 1 / -1; }
+
+.preview-frame-wrap {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.preview-frame-wrap iframe {
+  width: 1920px;
+  height: 1080px;
+  border: none;
+  transform-origin: top left;
+  display: block;
+}
+
+.preview-placeholder {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px;
+  color: var(--gold-dark);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+}
+.preview-placeholder .ph-icon {
+  font-size: 32px;
+  opacity: 0.4;
+}
+
+/* ── Download button ── */
+.btn-download {
+  display: none;
+  width: 100%;
+  padding: 14px;
+  background: var(--gold);
+  border: none;
+  color: #000;
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.4em;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  text-align: center;
+  text-decoration: none;
+}
+.btn-download:hover {
+  background: var(--gold-bright);
+  box-shadow: 0 0 24px rgba(232,168,32,0.4);
+}
+.btn-download.visible { display: block; }
+
+/* ── Status line ── */
+.status-line {
+  font-size: 11px;
+  color: var(--gold-dim);
+  letter-spacing: 0.15em;
+  margin-top: 12px;
+  min-height: 16px;
+  text-align: center;
+}
+.status-line.ok  { color: var(--gold-bright); }
+.status-line.err { color: #c0392b; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <header class="site-header">
+    <div class="site-logo">CONCORD — CAPSULEER REGISTRY</div>
+    <div class="site-sub">INTRO GENERATOR  ·  NEW EDEN AUTHORITY  ·  SECURE TOOL</div>
+  </header>
+
+  <div class="main-grid">
+
+    <!-- Form panel -->
+    <div class="panel">
+      <div class="c-br"></div><div class="c-bl"></div>
+      <div class="panel-title">// PILOT DATA INPUT</div>
+
+      <div class="field-group">
+        <label class="field-label" for="f-name">PILOT NAME <span>* required</span></label>
+        <input class="field-input" id="f-name" type="text" placeholder="e.g. Rhika Brynn" maxlength="24" autocomplete="off"/>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="f-corp">CORPORATION</label>
+        <input class="field-input" id="f-corp" type="text" placeholder="e.g. EVE University" maxlength="30" autocomplete="off"/>
+        <div class="field-hint">Leave blank to use the default value</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="f-alliance">ALLIANCE</label>
+        <input class="field-input" id="f-alliance" type="text" placeholder="e.g. Ivy League" maxlength="30" autocomplete="off"/>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="f-sec">SEC STATUS</label>
+        <input class="field-input" id="f-sec" type="text" placeholder="e.g. +2.4" maxlength="8" autocomplete="off"/>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="f-system">SISTEMA</label>
+        <input class="field-input" id="f-system" type="text" placeholder="e.g. JITA 4-4 // CALDARI PRIME" maxlength="36" autocomplete="off"/>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="f-yc">DATA YC</label>
+        <input class="field-input" id="f-yc" type="text" placeholder="e.g. 126.04.22" maxlength="12" autocomplete="off"/>
+      </div>
+
+      <button class="btn-generate" onclick="generatePreview()"><span>▶ GENERATE PREVIEW</span></button>
+      <div class="status-line" id="status-line"></div>
+    </div>
+
+    <!-- Info panel -->
+    <div class="panel">
+      <div class="c-br"></div><div class="c-bl"></div>
+      <div class="panel-title">// INSTRUCTIONS</div>
+
+      <div style="font-size:12px; color: var(--gold-dim); line-height:2; letter-spacing:0.05em;">
+        <p style="color:var(--gold); margin-bottom:12px;">How to use this tool:</p>
+        <p>01 &nbsp;Enter your pilot name in the field on the left.</p>
+        <br/>
+        <p>02 &nbsp;You can customise your corporation, alliance, sec status, system and YC date. Blank fields will use default values.</p>
+        <br/>
+        <p>03 &nbsp;Click <span style="color:var(--gold-bright)">GENERATE PREVIEW</span> to see the result.</p>
+        <br/>
+        <p>04 &nbsp;If you are happy with it, click <span style="color:var(--gold-bright)">DOWNLOAD</span> to save the HTML file.</p>
+        <br/>
+        <p>05 &nbsp;In OBS, add a <span style="color:var(--gold-bright)">Browser Source</span> with the downloaded file. Set the resolution to <span style="color:var(--gold-bright)">1920×1080</span>.</p>
+        <br/>
+        <hr style="border-color: var(--gold-dark); margin: 16px 0;"/>
+        <p style="color: var(--gold-dark); font-size:10px; letter-spacing:0.1em;">
+          CONCORD REGISTRY TOOL — NEW EDEN AUTHORITY<br/>
+          For internal use by authorised streamers.
+        </p>
+      </div>
+    </div>
+
+    <!-- Preview panel -->
+    <div class="panel preview-panel">
+      <div class="c-br"></div><div class="c-bl"></div>
+      <div class="panel-title">// PREVIEW — 1920×1080</div>
+
+      <div class="preview-frame-wrap" id="preview-wrap">
+        <div class="preview-placeholder" id="preview-placeholder">
+          <div class="ph-icon">◈</div>
+          <div>Fill in the fields and click GENERATE</div>
+        </div>
+        <iframe id="preview-frame" style="display:none;"></iframe>
+      </div>
+
+      <a class="btn-download" id="btn-download" download="concord_intro.html">
+        ⬇ DOWNLOAD HTML FILE
+      </a>
+      <div class="status-line" id="download-status"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Scale iframe to fit container
+function scalePreview() {
+  var wrap = document.getElementById('preview-wrap');
+  var frame = document.getElementById('preview-frame');
+  var scale = wrap.offsetWidth / 1920;
+  frame.style.transform = 'scale(' + scale + ')';
+  wrap.style.height = (1080 * scale) + 'px';
+}
+window.addEventListener('resize', scalePreview);
+scalePreview();
+
+function setStatus(msg, type) {
+  var el = document.getElementById('status-line');
+  el.textContent = msg;
+  el.className = 'status-line' + (type ? ' ' + type : '');
+}
+
+function val(id, fallback) {
+  var v = document.getElementById(id).value.trim();
+  return v || fallback;
+}
+
+function generatePreview() {
+  var name = document.getElementById('f-name').value.trim();
+  if (!name) {
+    setStatus('⚠ Please enter the pilot name.', 'err');
+    document.getElementById('f-name').focus();
+    return;
+  }
+
+  setStatus('Generating...', '');
+
+  var pilotName    = name.toUpperCase();
+  var corp         = val('f-corp', 'EVE UNIVERSITY');
+  var alliance     = val('f-alliance', 'IVY LEAGUE');
+  var sec          = val('f-sec', '+2.4');
+  var secLabel     = sec >= 0 ? '[COMPLIANT]' : '[SUSPECT]';
+  var system       = val('f-system', 'JITA 4-4 // CALDARI PRIME');
+  var yc           = val('f-yc', '126.04.22');
+  var pilotSub     = 'CAPSULEER  ·  NEW EDEN  ·  [' + corp.toUpperCase().substring(0,8) + ']';
+
+  var html = buildIntroHTML(pilotName, pilotSub, corp, alliance, sec, secLabel, system, yc);
+
+  // Show in iframe
+  var frame = document.getElementById('preview-frame');
+  frame.style.display = 'block';
+  document.getElementById('preview-placeholder').style.display = 'none';
+  frame.srcdoc = html;
+  scalePreview();
+
+  // Setup download
+  var blob = new Blob([html], { type: 'text/html' });
+  var url  = URL.createObjectURL(blob);
+  var btn  = document.getElementById('btn-download');
+  btn.href = url;
+  btn.download = 'concord_intro_' + name.replace(/\s+/g,'_').toLowerCase() + '.html';
+  btn.classList.add('visible');
+
+  setStatus('✓ Preview generated successfully.', 'ok');
+  document.getElementById('download-status').textContent = 'Click the button above to save the file.';
+  document.getElementById('download-status').className = 'status-line ok';
+}
+
+function buildIntroHTML(pilotName, pilotSub, corp, alliance, sec, secLabel, system, yc) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>${pilotName} — CONCORD Intro</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+#intro {
+  background: #000; width: 1920px; height: 1080px;
+  overflow: hidden; position: relative;
+  font-family: 'Courier New', monospace;
+}
+#scanlines {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+  pointer-events: none; z-index: 10;
+}
+#grid-bg {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(200,148,26,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(200,148,26,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.corner { position: absolute; width: 36px; height: 36px; }
+.corner.tl { top: 18px; left: 18px; border-top: 2px solid #C8941A; border-left: 2px solid #C8941A; }
+.corner.tr { top: 18px; right: 18px; border-top: 2px solid #C8941A; border-right: 2px solid #C8941A; }
+.corner.bl { bottom: 18px; left: 18px; border-bottom: 2px solid #C8941A; border-left: 2px solid #C8941A; }
+.corner.br { bottom: 18px; right: 18px; border-bottom: 2px solid #C8941A; border-right: 2px solid #C8941A; }
+#top-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #C8941A; opacity: 0; transform: scaleX(0); transform-origin: left; }
+#bot-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #C8941A; opacity: 0; transform: scaleX(0); transform-origin: left; }
+#header { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); text-align: center; opacity: 0; white-space: nowrap; }
+#header .concord-label { font-size: 18px; color: #C8941A; letter-spacing: 0.4em; font-weight: 700; }
+#header .sub-label { font-size: 11px; color: #6a4e0e; letter-spacing: 0.3em; margin-top: 4px; }
+#divider-top { position: absolute; top: 72px; left: 5%; right: 5%; height: 0.5px; background: #C8941A; opacity: 0; transform: scaleX(0); transform-origin: center; }
+#terminal { position: absolute; top: 90px; left: 5%; width: 38%; opacity: 0; }
+.t-line { font-size: 13px; color: #6a4e0e; letter-spacing: 0.05em; line-height: 1.9; white-space: nowrap; overflow: hidden; width: 0; }
+.t-line.gold { color: #C8941A; }
+.t-line.bright { color: #E8A820; font-weight: 700; }
+.t-line.dim { color: #3a2a06; }
+.t-sep { border: none; border-top: 0.5px solid #3a2a06; margin: 8px 0; opacity: 0; }
+#vert-div { position: absolute; top: 90px; bottom: 80px; left: 46%; width: 0.5px; background: #3a2a06; opacity: 0; }
+#portrait-zone { position: absolute; top: 80px; right: 4%; width: 50%; bottom: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+#scan-ring { width: 200px; height: 200px; border-radius: 50%; border: 1.5px solid #C8941A; display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px; }
+#scan-ring::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; border: 0.5px solid #3a2a06; }
+#scan-line-anim { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: rgba(232,168,32,0.5); animation: scanDown 2s linear infinite; }
+@keyframes scanDown { 0%{top:0;opacity:1} 90%{top:100%;opacity:0.3} 100%{top:100%;opacity:0} }
+#portrait-label { font-size: 11px; color: #6a4e0e; letter-spacing: 0.3em; margin-bottom: 14px; }
+#pilot-name { position: absolute; right: 4%; top: 50%; transform: translateY(-50%); width: 50%; font-size: 52px; color: #E8A820; font-weight: 700; letter-spacing: 0.2em; text-align: center; opacity: 0; }
+#pilot-sub { position: absolute; right: 4%; top: calc(50% + 56px); width: 50%; font-size: 13px; color: #C8941A; letter-spacing: 0.35em; text-align: center; opacity: 0; }
+#status-bar { position: absolute; bottom: 28px; left: 5%; right: 5%; display: flex; justify-content: space-between; align-items: center; opacity: 0; }
+.st-item { font-size: 11px; color: #6a4e0e; letter-spacing: 0.15em; }
+.st-item span { color: #C8941A; }
+#access-granted { position: absolute; left: 0; right: 0; top: 72%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
+#access-granted .ag-text { font-size: 64px; color: #E8A820; font-weight: 700; letter-spacing: 0.4em; border: 2px solid #C8941A; padding: 0.4em 1em; }
+#fade-out { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="intro">
+  <div id="grid-bg"></div>
+  <div id="scanlines"></div>
+  <div class="corner tl"></div><div class="corner tr"></div>
+  <div class="corner bl"></div><div class="corner br"></div>
+  <div id="top-bar"></div>
+  <div id="bot-bar"></div>
+  <div id="header">
+    <div class="concord-label">CONCORD — CAPSULEER REGISTRY</div>
+    <div class="sub-label">SECURE CHANNEL  ·  NEW EDEN AUTHORITY  ·  YC${yc.split('.')[0] || '126'}</div>
+  </div>
+  <div id="divider-top"></div>
+  <div id="terminal">
+    <div class="t-line dim" id="l0">// INITIALIZING SECURE CHANNEL...</div>
+    <hr class="t-sep" id="s0"/>
+    <div class="t-line" id="l1">REGISTRY  : CAPSULEER DATABASE v4.1.7</div>
+    <div class="t-line" id="l2">REQUEST   : PILOT IDENTITY VERIFICATION</div>
+    <div class="t-line" id="l3">AUTHORITY : CONCORD / INNER CIRCLE</div>
+    <hr class="t-sep" id="s1"/>
+    <div class="t-line gold" id="l4">SCANNING NEURAL SIGNATURE...</div>
+    <div class="t-line gold" id="l5">CROSS-REF: CALDARI STATE NAVY RECORDS</div>
+    <div class="t-line gold" id="l6">CROSS-REF: ${corp.toUpperCase()}</div>
+    <hr class="t-sep" id="s2"/>
+    <div class="t-line" id="l7">ORIGIN    : NEW EDEN</div>
+    <div class="t-line" id="l8">CORP      : ${corp.toUpperCase()}</div>
+    <div class="t-line" id="l9">ALLIANCE  : ${alliance.toUpperCase()}</div>
+    <div class="t-line" id="l10">SEC STATUS: ${sec}  ${secLabel}</div>
+    <hr class="t-sep" id="s3"/>
+    <div class="t-line" id="l11">DOCTRINE  : DIPLOMACY FIRST</div>
+    <div class="t-line" id="l12">ACTIVE OPS: SECURITY / MINING</div>
+    <div class="t-line" id="l13">ABYSSAL   : CLEARANCE GRANTED</div>
+    <hr class="t-sep" id="s4"/>
+    <div class="t-line bright" id="l14">STATUS    : IDENTITY CONFIRMED</div>
+    <div class="t-line bright" id="l15">ACCESS    : GRANTED — UNDOCKING AUTHORISED</div>
+  </div>
+  <div id="vert-div"></div>
+  <div id="portrait-zone">
+    <div id="portrait-label">NEURAL SCAN IN PROGRESS</div>
+    <div id="scan-ring">
+      <div id="scan-line-anim"></div>
+      <svg width="140" height="140" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="38" fill="none" stroke="#3a2a06" stroke-width="0.5"/>
+        <circle cx="40" cy="40" r="28" fill="none" stroke="#C8941A" stroke-width="0.5" stroke-dasharray="4 3"/>
+        <line x1="40" y1="2" x2="40" y2="18" stroke="#C8941A" stroke-width="0.8"/>
+        <line x1="40" y1="62" x2="40" y2="78" stroke="#C8941A" stroke-width="0.8"/>
+        <line x1="2" y1="40" x2="18" y2="40" stroke="#C8941A" stroke-width="0.8"/>
+        <line x1="62" y1="40" x2="78" y2="40" stroke="#C8941A" stroke-width="0.8"/>
+        <circle cx="40" cy="40" r="6" fill="none" stroke="#E8A820" stroke-width="1"/>
+        <circle cx="40" cy="40" r="2" fill="#E8A820"/>
+        <text x="40" y="55" text-anchor="middle" font-family="Courier New" font-size="5" fill="#C8941A" letter-spacing="1">SCANNING</text>
+      </svg>
+    </div>
+  </div>
+  <div id="pilot-name">${pilotName}</div>
+  <div id="pilot-sub">${pilotSub}</div>
+  <div id="status-bar">
+    <div class="st-item">SYS: <span>${system.toUpperCase()}</span></div>
+    <div class="st-item">CONN: <span>ENCRYPTED</span></div>
+    <div class="st-item">AUTH: <span>CONCORD VERIFIED</span></div>
+    <div class="st-item">YC: <span>${yc}</span></div>
+  </div>
+  <div id="access-granted"><div class="ag-text">ACCESS GRANTED</div></div>
+  <div id="fade-out"></div>
+</div>
+<script>
+function fadeEl(el,to,dur,delay){delay=delay||0;return new Promise(function(res){setTimeout(function(){el.style.transition='opacity '+dur+'ms';el.style.opacity=to;setTimeout(res,dur);},delay);})}
+function typeEl(el,delay){delay=delay||0;return new Promise(function(res){setTimeout(function(){var fullW=el.scrollWidth+'px';el.style.transition='width 0.4s steps(30,end)';el.style.width=fullW;setTimeout(res,420);},delay);})}
+function showSep(el,delay){delay=delay||0;return new Promise(function(res){setTimeout(function(){el.style.transition='opacity 200ms';el.style.opacity=1;setTimeout(res,200);},delay);})}
+async function runIntro(){
+  var tb=document.getElementById('top-bar');
+  tb.style.opacity='1';tb.style.transition='transform 0.6s ease-out';tb.style.transform='scaleX(1)';
+  setTimeout(function(){var bb=document.getElementById('bot-bar');bb.style.opacity='1';bb.style.transition='transform 0.6s ease-out';bb.style.transform='scaleX(1)';},200);
+  await fadeEl(document.getElementById('header'),1,400,600);
+  var dt=document.getElementById('divider-top');dt.style.opacity='1';dt.style.transition='transform 0.5s ease-out';dt.style.transform='scaleX(1)';
+  await fadeEl(document.getElementById('terminal'),1,300,800);
+  await fadeEl(document.getElementById('vert-div'),1,300,900);
+  await fadeEl(document.getElementById('portrait-zone'),1,400,1000);
+  var lines=[['l0',0],['s0',420],['l1',500],['l2',920],['l3',1340],['s1',1760],['l4',1800],['l5',2220],['l6',2640],['s2',3060],['l7',3100],['l8',3520],['l9',3940],['l10',4360],['s3',4780],['l11',4820],['l12',5240],['l13',5660],['s4',6080],['l14',6120],['l15',6540]];
+  lines.forEach(function(pair){var el=document.getElementById(pair[0]);if(!el)return;if(el.tagName==='HR')showSep(el,pair[1]+1000);else typeEl(el,pair[1]+1000);});
+  await new Promise(function(r){setTimeout(r,8200);});
+  await fadeEl(document.getElementById('pilot-name'),1,600);
+  await fadeEl(document.getElementById('pilot-sub'),1,400,200);
+  await fadeEl(document.getElementById('status-bar'),1,400,400);
+  await new Promise(function(r){setTimeout(r,1500);});
+  var ag=document.getElementById('access-granted');
+  await fadeEl(ag,1,300);
+  await new Promise(function(r){setTimeout(r,800);});
+  await fadeEl(ag,0,300);
+  await new Promise(function(r){setTimeout(r,600);});
+  await fadeEl(document.getElementById('fade-out'),1,1000);
+}
+window.addEventListener('load',function(){setTimeout(runIntro,300);});
+<\/script>
+</body>
+</html>`;
+}
+</script>
+</body>
+</html>
