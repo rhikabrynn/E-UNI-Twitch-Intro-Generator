@@ -548,34 +548,213 @@ function generateIntro() {
 ══════════════════════════════════════════════════ */
 function generateOverlay() {
   var name = document.getElementById('o-name').value.trim();
-  if (!name) { setStatus('o-status','⚠ Please enter the pilot name.','err'); document.getElementById('o-name').focus(); return; }
-  setStatus('o-status','Generating...','');
+  if (!name) { setStatus('o-status','⚠ Please enter the pilot name.','err'); return; }
+  setStatus('o-status','Rendering...','');
 
   var pilotName = name.toUpperCase();
-  var sub       = val('o-sub',    'CAPSULEER · CALDARI STATE');
+  var sub       = val('o-sub','CAPSULEER · CALDARI STATE').toUpperCase();
   var quote     = document.getElementById('o-quote').value.trim();
-  var badgesRaw = val('o-badges', 'EVE UNIVERSITY, SECURITY OPS');
+  var badgesRaw = val('o-badges','EVE UNIVERSITY, SECURITY OPS');
   var badges    = badgesRaw.split(',').map(function(b){ return b.trim().toUpperCase(); }).filter(Boolean);
 
-  var html = buildOverlayHTML(pilotName, sub, quote, badges);
+  var canvas = document.getElementById('o-canvas');
+  canvas.width  = 1920;
+  canvas.height = 1080;
+  var ctx = canvas.getContext('2d');
 
-  var frame = document.getElementById('o-frame');
-  frame.style.display = 'block';
+  var GOLD        = '#C8941A';
+  var GOLD_BRIGHT = '#E8A820';
+  var GOLD_DIM    = '#6a4e0e';
+  var GOLD_DARK   = '#3a2a06';
+
+  // ── Full black background (matches original) ──
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, 1920, 1080);
+
+  // ── Right side: transparent (game shows through) ──
+  ctx.clearRect(420, 3, 1497, 1074);
+
+  // ── Border lines ──
+  // Top full-width gold line
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(0, 0, 1920, 2);
+  // Left
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(0, 0, 2, 1080);
+  // Bottom left accent
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(0, 1078, 420, 2);
+  // Right dim
+  ctx.globalAlpha = 0.2;
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(1918, 0, 2, 1080);
+  ctx.fillRect(420, 1078, 1500, 2);
+  ctx.globalAlpha = 1;
+
+  // Vertical divider at 420
+  ctx.fillStyle = GOLD_DARK;
+  ctx.fillRect(418, 0, 1, 1080);
+
+  // Corner accents
+  ctx.strokeStyle = GOLD_BRIGHT;
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(0,24); ctx.lineTo(0,0); ctx.lineTo(24,0); ctx.stroke();
+
+  ctx.globalAlpha = 0.3;
+  ctx.strokeStyle = GOLD;
+  ctx.beginPath(); ctx.moveTo(1896,0); ctx.lineTo(1920,0); ctx.lineTo(1920,24); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(1920,1056); ctx.lineTo(1920,1080); ctx.lineTo(1896,1080); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // ── Info block — build bottom-up ──
+  var blockX = 22;
+  var blockW = 385;
+  var curY   = 1080 - 30;
+
+  // Badges
+  ctx.font = '18px "Courier New"';
+  var badgeH = 26, padX = 10;
+  var badgeY = curY - badgeH;
+  var bx = blockX;
+  badges.forEach(function(b) {
+    var tw = ctx.measureText(b).width;
+    var bw = tw + padX * 2;
+    ctx.strokeStyle = '#5a3c0a'; ctx.lineWidth = 1;
+    ctx.strokeRect(bx, badgeY, bw, badgeH);
+    ctx.fillStyle = 'rgba(200,148,26,0.06)';
+    ctx.fillRect(bx, badgeY, bw, badgeH);
+    ctx.fillStyle = GOLD;
+    ctx.fillText(b, bx + padX, badgeY + 17);
+    bx += bw + 8;
+  });
+  curY = badgeY - 14;
+
+  // Separator
+  var gs = ctx.createLinearGradient(blockX,0,blockX+blockW,0);
+  gs.addColorStop(0,'#2a1e04'); gs.addColorStop(1,'transparent');
+  ctx.fillStyle = gs; ctx.fillRect(blockX, curY, blockW, 1);
+  curY -= 28;
+
+  // Subtitle
+  ctx.font = '20px "Courier New"';
+  ctx.fillStyle = '#8a6420';
+  ctx.fillText(sub, blockX, curY);
+  curY -= 14;
+
+  // Pilot name
+  ctx.font = 'bold 76px "Courier New"';
+  ctx.shadowColor = 'rgba(200,148,26,0.4)';
+  ctx.shadowBlur  = 28;
+  ctx.fillStyle   = GOLD;
+  ctx.fillText(pilotName, blockX, curY);
+  ctx.shadowBlur  = 0;
+  curY -= 16;
+
+  // Divider above name
+  var gd = ctx.createLinearGradient(blockX,0,blockX+blockW,0);
+  gd.addColorStop(0, GOLD); gd.addColorStop(1,'transparent');
+  ctx.fillStyle = gd; ctx.fillRect(blockX, curY, blockW, 1);
+  curY -= 18;
+
+  // Quote (optional, with text wrap)
+  if (quote) {
+    ctx.font = 'italic 20px "Courier New"';
+    ctx.fillStyle = '#7a5c14';
+    var words = quote.split(' '), line = '', lineY = curY;
+    words.forEach(function(w) {
+      var test = line + (line ? ' ' : '') + w;
+      if (ctx.measureText(test).width > blockW - 4 && line) {
+        ctx.fillText(line, blockX, lineY); line = w; lineY -= 24;
+      } else { line = test; }
+    });
+    ctx.fillText(line, blockX, lineY);
+    curY = lineY - 8;
+    var gq = ctx.createLinearGradient(blockX,0,blockX+blockW,0);
+    gq.addColorStop(0,GOLD_DARK); gq.addColorStop(1,'transparent');
+    ctx.fillStyle = gq; ctx.fillRect(blockX, curY, blockW, 1);
+  }
+
+  // ── Logos bottom right ──
+  var lr = 34, lgap = 14;
+  var l2x = 1920 - 24 - lr*2;
+  var l1x = l2x - lr*2 - lgap;
+  var ly  = 1080 - 24 - lr*2;
+  drawEUniLogo(ctx, l1x, ly, lr, GOLD);
+  drawFactionLogo(ctx, l2x, ly, lr, GOLD, GOLD_DIM);
+
+  // Show canvas
+  canvas.style.display = 'block';
   document.getElementById('o-placeholder').style.display = 'none';
-  frame.srcdoc = html;
-  scaleFrame('o-preview-wrap','o-frame');
+  scaleCanvas('o-preview-wrap','o-canvas');
 
-  var blob = new Blob([html], {type:'text/html'});
-  var url  = URL.createObjectURL(blob);
-  var btn  = document.getElementById('o-download');
-  btn.href = url;
-  btn.download = 'concord_overlay_' + name.replace(/\s+/g,'_').toLowerCase() + '.html';
+  var btn = document.getElementById('o-download');
   btn.classList.add('visible');
+  btn.onclick = function() {
+    var link = document.createElement('a');
+    link.download = 'concord_overlay_' + name.replace(/\s+/g,'_').toLowerCase() + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
 
-  setStatus('o-status','✓ Preview generated successfully.','ok');
-  document.getElementById('o-dl-status').textContent = 'Click the button above to save the file.';
+  setStatus('o-status','✓ PNG rendered successfully.','ok');
+  document.getElementById('o-dl-status').textContent = 'Click the button above to save the PNG.';
   document.getElementById('o-dl-status').className = 'status-line ok';
 }
+
+function drawEUniLogo(ctx, x, y, r, gold) {
+  var cx = x+r, cy = y+r;
+  ctx.fillStyle='rgba(0,0,0,0.55)';
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle=gold; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+  // Shield
+  var sh=r*0.72, sw=r*0.58;
+  ctx.strokeStyle=gold; ctx.lineWidth=1.2;
+  ctx.fillStyle='rgba(200,148,26,0.1)';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy-sh);
+  ctx.lineTo(cx+sw, cy-sh*0.4);
+  ctx.lineTo(cx+sw, cy+sh*0.2);
+  ctx.quadraticCurveTo(cx, cy+sh, cx, cy+sh);
+  ctx.quadraticCurveTo(cx-sw, cy+sh*0.2, cx-sw, cy+sh*0.2);
+  ctx.lineTo(cx-sw, cy-sh*0.4);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  // Bird wings
+  ctx.fillStyle=gold;
+  ctx.beginPath();
+  ctx.moveTo(cx,   cy-sh*0.25);
+  ctx.lineTo(cx+sw*0.55, cy-sh*0.0);
+  ctx.lineTo(cx+sw*0.25, cy+sh*0.1);
+  ctx.lineTo(cx,   cy+sh*0.2);
+  ctx.lineTo(cx-sw*0.25, cy+sh*0.1);
+  ctx.lineTo(cx-sw*0.55, cy-sh*0.0);
+  ctx.closePath(); ctx.fill();
+}
+
+function drawFactionLogo(ctx, x, y, r, gold, dim) {
+  var cx = x+r, cy = y+r;
+  ctx.fillStyle='rgba(0,0,0,0.55)';
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle=gold; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle=dim; ctx.lineWidth=0.5;
+  ctx.beginPath(); ctx.arc(cx,cy,r*0.75,0,Math.PI*2); ctx.stroke();
+  // inner shield
+  var sh=r*0.52, sw=r*0.42;
+  ctx.strokeStyle=gold; ctx.lineWidth=1;
+  ctx.fillStyle='rgba(200,148,26,0.08)';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy-sh);
+  ctx.lineTo(cx+sw, cy-sh*0.4);
+  ctx.lineTo(cx+sw, cy+sh*0.15);
+  ctx.quadraticCurveTo(cx, cy+sh*0.9, cx, cy+sh*0.9);
+  ctx.quadraticCurveTo(cx-sw, cy+sh*0.15, cx-sw, cy+sh*0.15);
+  ctx.lineTo(cx-sw, cy-sh*0.4);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#E8A820';
+  ctx.beginPath(); ctx.arc(cx,cy,r*0.13,0,Math.PI*2); ctx.fill();
+}
+
 
 /* ══════════════════════════════════════════════════
    BUILD INTRO HTML
